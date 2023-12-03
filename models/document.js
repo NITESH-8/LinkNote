@@ -1,9 +1,9 @@
 // models/document.js
 
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const documentScheme = new mongoose.Schema({
-  longURL:{
+  longURL: {
     type: String,
   },
   value: {
@@ -19,10 +19,11 @@ const documentScheme = new mongoose.Schema({
     default: () => Math.random().toString(36).substr(2, 6), // Generate a random short ID
   },
   shortURL: String,
+  customAlias: String,
   mainURLAccessCount: {
     type: Number,
     default: -1,
   },
 });
 
-module.exports = mongoose.model('document', documentScheme, 'objects');
+module.exports = mongoose.model("document", documentScheme, "objects");

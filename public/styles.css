@@ -3,6 +3,7 @@ body {
     background: url("images/bg.svg") no-repeat;
     background-repeat: no-repeat;
     background-size: cover;
+    height: 100vh;
     /* Black background */
     margin: 0;
     color: #ffffff;
@@ -25,7 +26,7 @@ body {
     padding: 1rem 0.5rem;
     margin-top: 0;
     font-size: 1rem;
-    color: #ffffff;
+    color: #000000;
     align-self: center;
     text-align: center;
     /* align-items: center; */
@@ -91,10 +92,13 @@ body {
 }
 .textArea{
     display: inline-flex;
-    background-color: #4d6948; 
+    background-color: white; 
     border-radius: 20px;
     width: 60%;
+    text-wrap: pretty;
     height: 220px;
+    font-size: larger;
+    /* font-weight: bold; */
     border: 10px ;
     padding: 15px;
 }
@@ -243,7 +247,7 @@ textarea {
 
 .btn {
     cursor: pointer;
-    background: rgb(13, 107, 4);
+    background: rgb(68, 20, 122);
     box-shadow: 1px 1px;
     border: 2px solid #ffffff;
     align-self: center;
@@ -270,7 +274,7 @@ textarea {
 .shorten-url {
    opacity: 0.9; 
     transition: opacity 200ms ease-in-out;
-    background-color: rgb(61, 136, 54);
+    background-color: rgb(68, 20, 122);
     /* Dark background for the buttons wrapper */
     box-shadow: 3px 5px;
     padding: 1rem;

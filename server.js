@@ -14,10 +14,14 @@ const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 var longURL;
 var error = "Server Error!! Please Try Again Later.";
 
-mongoose.connect("mongodb+srv://Nitesh:12345@cluster0.3n3ihxh.mongodb.net/", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect(
+  "mongodb+srv://adithyanayak:adithyanayak321@cluster0.buuohlf.mongodb.net/wastebin",
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  }
+);
+
 const db = mongoose.connection;
 
 db.on("error", (error) => {
@@ -137,6 +141,28 @@ app.post("/url-short", async (req, res) => {
     });
   }
 });
+app.get("/:param", async (req, res) => {
+  const param = req.params.param;
+
+  try {
+    const document = await Document.findOne({ customAlias: param });
+
+    if (document) {
+      res.redirect(document.longURL);
+    } else {
+      const result = await URL.findOne({ shortID: param });
+
+      if (result == null) {
+        return res.sendStatus(404);
+      }
+
+      res.redirect(result.longURL);
+    }
+  } catch (error) {
+    console.error(error);
+    return res.sendStatus(500);
+  }
+});
 
 async function displayShortURL(req, res, result) {
   try {
@@ -162,13 +188,6 @@ async function displayShortURL(req, res, result) {
     });
   }
 }
-
-app.get("/:shortID", async (req, res) => {
-  const result = await URL.findOne({ shortID: req.params.shortID });
-  if (result == null) return res.sendStatus(404);
-
-  res.redirect(result.longURL);
-});
 
 app.use((req, res, next) => {
   if (req.url === "/favicon.ico") {
@@ -212,7 +231,6 @@ app.get("/documents/:id", async (req, res) => {
 
 app.get("/shorten-url/:id", async (req, res) => {
   const id = req.params.id;
-
   try {
     if (mongoose.Types.ObjectId.isValid(id)) {
       console.log("Valid ObjectId:", id);
@@ -220,13 +238,18 @@ app.get("/shorten-url/:id", async (req, res) => {
       const document = await Document.findById(id);
 
       if (document) {
-        // Retrieve the Referer header to get the URL of the previous page
         const longURL = req.headers.referer || "";
         console.log(longURL);
+
+        document.longURL = longURL;
+        await document.save();
+
+        const shortURL = document.customAlias;
+
         res.render("shorten-url", {
           longURL,
           id,
-          shortURL: document.shortURL,
+          shortURL,
           error: "",
         });
       } else {
@@ -246,26 +269,32 @@ app.get("/shorten-url/:id", async (req, res) => {
   }
 });
 
-// Update the /shorten-url/:id endpoint
 app.post("/shorten-url/:id", async (req, res) => {
-  const { id } = req.params;
-  const { customAlias } = req.body;
-
+  const id = req.params.id;
+  const customAlias = req.body.customAlias;
   try {
     const document = await Document.findById(id);
 
     if (document) {
-      document.longURL = req.headers.referer || "";
-      const newShortURL = BASE_URL + "/" + (customAlias || document.shortURL);
+      if (customAlias) {
+        const existingDocument = await Document.findOne({ customAlias });
+        if (existingDocument) {
+          return res.render("shorten-url", {
+            longURL: document.longURL,
+            error: "Custom alias already in use. Please choose another one.",
+            id,
+            shortURL: "",
+          });
+        }
+        document.customAlias = customAlias;
+      }
 
-      document.shortURL = newShortURL;
       await document.save();
 
-      // Render the same page with the updated short URL
       res.render("shorten-url", {
         longURL: document.longURL,
         id,
-        shortURL: document.shortURL,
+        shortURL: BASE_URL + "/" + document.customAlias,
         error: "",
       });
     } else {
@@ -278,38 +307,5 @@ app.post("/shorten-url/:id", async (req, res) => {
       id,
       shortURL: "",
     });
-  }
-});
-
-app.get("/:id", async (req, res) => {
-  const id = req.params.id;
-
-  try {
-    const document = await Document.findById(id);
-
-    if (document) {
-      document.mainURLAccessCount += 1;
-      await document.save();
-
-      const currentTimestamp = new Date();
-      if (
-        document.expiryTimestamp &&
-        currentTimestamp > document.expiryTimestamp
-      ) {
-        res.redirect("/");
-      } else {
-        res.render("code-display", {
-          code: document.value,
-          id,
-          expiryTimestamp: document.expiryTimestamp,
-          mainURLAccessCount: document.mainURLAccessCount,
-        });
-      }
-    } else {
-      res.redirect("/");
-    }
-  } catch (e) {
-    console.error(e);
-    res.redirect("/");
   }
 });

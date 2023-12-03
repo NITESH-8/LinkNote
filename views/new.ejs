@@ -18,7 +18,7 @@
     <form action="/save" method="POST">
       <div class="welcome-section">
         <div class="index-logo"></div>
-        <h2 class="title-header">NOTESHARE</h2>
+        <h2 class="title-header">LINKNOTE</h2>
       </div>
 
       <div class="wrapper">
@@ -39,7 +39,7 @@
     </form>
     <script>
       autosize(document.querySelector(".textArea"));
-      function validateTextarea(textarea) {
+      function limitWordsText(textarea) {
         // Limit the textarea to 800 words
         const maxWords = 800;
         const wordCount = textarea.value.split(/\s+/).length;
@@ -60,13 +60,13 @@
         return true;
       }
 
-      function validateCustomExpiry(input) {
+      function validateTimeExpiry(input) {
         // Ensure the input is a positive integer
         let value = parseInt(input.value, 10);
         if (isNaN(value) || value < 0) {
           input.value = ""; // Clear the input if it's not a valid number
         } else {
-          // Limit the input to a maximum of two years (in minutes)
+          // Limit the input to a maximum of a year (in minutes)
           const maxMinutes = 365 * 24 * 60;
           input.value = Math.min(value, maxMinutes);
         }
